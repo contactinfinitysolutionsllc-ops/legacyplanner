@@ -132,9 +132,9 @@ footer a{color:var(--accent2);text-decoration:none}
 <body>
 
 <nav>
-  <a href="https://contactinfinitysolutionsllc-ops.github.io/infinityhub/" class="logo">Infinity<em>.</em>Solutions</a>
+  <a href="https://infinityhub.dev" class="logo">Infinity<em>.</em>Solutions</a>
   <div class="nav-right">
-    <a href="https://contactinfinitysolutionsllc-ops.github.io/infinityhub/" class="nav-back">← Back to hub</a>
+    <a href="https://infinityhub.dev" class="nav-back">← Back to hub</a>
     <span class="nav-badge">Legacy Planner</span>
   </div>
 </nav>
@@ -413,7 +413,7 @@ footer a{color:var(--accent2);text-decoration:none}
 </div>
 
 <footer>
-  <p>© 2025 <a href="https://contactinfinitysolutionsllc-ops.github.io/infinityhub/">Infinity Solutions LLC</a> · All Rights Reserved · This tool is not a substitute for professional mental health care.</p>
+  <p>© 2025 <a href="https://infinityhub.dev">Infinity Solutions LLC</a> · All Rights Reserved · This tool is not a substitute for professional mental health care.</p>
 </footer>
 
 <script>
@@ -438,14 +438,18 @@ function updateFreeUI(){
 }
 
 // ── SUBSCRIBER ────────────────────────────────────────────
+let _subCache = null;
 async function isSubscribed(){
   const email=localStorage.getItem('legacy_email');
   if(!email) return false;
+  if(_subCache !== null) return _subCache;
   try{
     const res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({action:'checkSubscriber',email,app:'legacyplanner'})});
     const data=await res.json();
-    return data.active===true;
+    _subCache = data.active===true;
+    setTimeout(()=>{ _subCache=null; },5*60*1000);
+    return _subCache;
   }catch{return false;}
 }
 
@@ -460,6 +464,7 @@ async function unlockWithEmail(){
     const data=await res.json();
     if(data.active){
       localStorage.setItem('legacy_email',email);
+      _subCache=true;
       document.getElementById('paywall').style.display='none';
       document.getElementById('free-banner').innerHTML='<div class="free-left">✓ <strong>Unlimited</strong> — subscribed as '+email+'</div>';
       alert('Unlocked. Take all the time you need.');
@@ -696,6 +701,7 @@ if(window.location.search.includes('paid=true')){
       body:JSON.stringify({action:'addSubscriber',email,app:'legacyplanner'})
     }).then(()=>{
       localStorage.setItem('legacy_email',email);
+      _subCache=true;
       localStorage.removeItem('legacy_pending_email');
       localStorage.removeItem('legacy_pending_type');
       updateFreeUI();
