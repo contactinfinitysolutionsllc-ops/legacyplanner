@@ -439,19 +439,7 @@ function updateFreeUI(){
 
 // ── SUBSCRIBER ────────────────────────────────────────────
 let _subCache = null;
-async function isSubscribed(){
-  const email=localStorage.getItem('legacy_email');
-  if(!email) return false;
-  if(_subCache !== null) return _subCache;
-  try{
-    const res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({action:'checkSubscriber',email,app:'legacyplanner'})});
-    const data=await res.json();
-    _subCache = data.active===true;
-    setTimeout(()=>{ _subCache=null; },5*60*1000);
-    return _subCache;
-  }catch{return false;}
-}
+// isSubscribed → see getStoredSession() below
 
 async function unlockWithEmail(){
   const email=document.getElementById('unlock-email').value.trim();
@@ -695,7 +683,7 @@ async function handlePay(type){
 }
 
 if(window.location.search.includes('paid=true')){
-  const email=localStorage.getItem('legacy_pending_email');
+  const email=localStorage.getItem('ig_account_email');
   if(email){
     fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({action:'addSubscriber',email,app:'legacyplanner'})
